@@ -21,7 +21,7 @@ resource "aws_security_group" "alb_sg" {
 
 #EC2 SG
 resource "aws_security_group" "ecs_sg" {
-  name        = "ec2-sg"
+  name        = "ecs-sg"
   description = "Allow traffic from ALB to ECS containers"
   vpc_id      = var.vpc_id
 
