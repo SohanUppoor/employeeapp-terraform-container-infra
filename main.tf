@@ -54,3 +54,23 @@ module "ecs_cluster" {
 
   cluster_name = "employee-app-cluster"
 }
+
+module "ecs_service" {
+  source = "./modules/ecs-service"
+
+  cluster_id       = module.ecs_cluster.cluster_id
+  private_subnets  = module.network.private_subnet_ids
+  ecs_sg_id        = module.security.ecs_sg_id
+
+  frontend_image = "${module.ecr.frontend_repository_url}:latest"
+  backend_image  = "${module.ecr.backend_repository_url}:latest"
+
+  frontend_target_group = module.alb.frontend_target_group_arn
+  backend_target_group  = module.alb.backend_target_group_arn
+
+  ecs_task_execution_role = module.iam.ecs_task_execution_role_arn
+
+  db_url      = module.rds.db_endpoint
+  db_username = "admin"
+  db_password = var.db_password
+}
