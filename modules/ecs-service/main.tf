@@ -100,3 +100,5 @@ resource "aws_ecs_service" "frontend" {
 
   depends_on = [var.frontend_target_group]
 }
+
+#need to add min_tasks = 1, max_tasks = 3
