@@ -58,9 +58,9 @@ module "ecs_cluster" {
 module "ecs_service" {
   source = "./modules/ecs-service"
 
-  cluster_id       = module.ecs_cluster.cluster_id
-  private_subnets  = module.network.private_subnet_ids
-  ecs_sg_id        = module.security.ecs_sg_id
+  cluster_id      = module.ecs_cluster.cluster_id
+  private_subnets = module.network.private_subnet_ids
+  ecs_sg_id       = module.security.ecs_sg_id
 
   frontend_image = "${module.ecr.frontend_repository_url}:latest"
   backend_image  = "${module.ecr.backend_repository_url}:latest"
