@@ -20,18 +20,7 @@ The infrastructure uses **Amazon ECS (Fargate)** to run containerized services b
 
 ### High Level Flow
 
-```
-User
-  ↓
-Application Load Balancer (Public)
-  ↓
------------------------------------------
-|                                       |
-Frontend Service (ECS Fargate)     Backend Service (ECS Fargate)
-(NGINX - Port 80)                 (Spring Boot - Port 8081)
-  ↓                                       ↓
-            Amazon RDS (MySQL - Private Subnet)
-```
+![Architecture](aws_architecture_ecs.png)
 
 ---
 
