@@ -28,6 +28,7 @@ module "alb" {
   public_subnet_ids = module.network.public_subnet_ids
   alb_sg_id         = module.security.alb_sg_id
   # ec2_instance_id    = module.ec2.ec2_id
+  certificate_arn = var.certificate_arn
 }
 
 module "rds" {
