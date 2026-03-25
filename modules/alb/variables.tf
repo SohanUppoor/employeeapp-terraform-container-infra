@@ -13,3 +13,8 @@ variable "alb_sg_id" {
 # variable "ec2_instance_id" {
 #   type = string
 # }
+
+variable "certificate_arn" {
+  description = "ACM certificate ARN"
+  type        = string
+}

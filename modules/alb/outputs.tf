@@ -9,3 +9,4 @@ output "frontend_target_group_arn" {
 output "backend_target_group_arn" {
   value = aws_lb_target_group.backend.arn
 }
+
