@@ -2,21 +2,41 @@
 
 ## 📌 Overview
 
-This repository provisions a **modern containerized infrastructure** for the Employee Management Application using **Terraform** and **AWS ECS (Fargate)**.
+This repository provisions a **modern, cloud-native infrastructure** for the Employee Management Application using **Terraform** and **AWS ECS (Fargate)**.
 
-This project is an evolution of a traditional EC2-based deployment to a **cloud-native, container-based architecture**, demonstrating real-world DevOps practices.
+The project demonstrates a **real-world DevOps evolution**:
 
-The application consists of:
+```text
+Traditional EC2 Deployment → Containerization → CI/CD → Secure HTTPS Deployment
+```
 
-* **Frontend**: React (Vite) served via NGINX
-* **Backend**: Spring Boot (Java 17)
-* **Database**: MySQL (AWS RDS)
+The application is now fully accessible via a **custom domain with HTTPS**:
+
+```text
+https://uppoor.online
+https://www.uppoor.online
+```
+
+---
+
+## 🌐 Live Application
+
+The application is publicly accessible using a **custom domain configured via Namecheap and AWS ACM**:
+
+* ✅ https://uppoor.online
+* ✅ https://www.uppoor.online
+
+Features:
+
+* Secure HTTPS connection (SSL/TLS)
+* Automatic HTTP → HTTPS redirection
+* Domain mapped to AWS Application Load Balancer
 
 ---
 
 ## 🏗️ Architecture
 
-The infrastructure uses **Amazon ECS (Fargate)** to run containerized services behind an Application Load Balancer.
+The infrastructure uses **Amazon ECS (Fargate)** to run containerized services behind an **Application Load Balancer with HTTPS support**.
 
 ### High Level Flow
 
@@ -29,47 +49,70 @@ The infrastructure uses **Amazon ECS (Fargate)** to run containerized services b
 ### 🌐 VPC & Networking
 
 * Custom VPC with CIDR block
-* Public subnets (for ALB & ECS tasks)
-* Private subnets (for RDS)
-* Internet Gateway
-* Route Tables
+* Public subnets (ALB + ECS tasks)
+* Private subnets (RDS)
+* Internet Gateway & Route Tables
 
-> 💡 ECS tasks are deployed in **public subnets with public IPs** to avoid NAT Gateway costs (free-tier optimization).
+> 💡 ECS tasks run in **public subnets with public IPs** to avoid NAT Gateway costs (free-tier optimization).
 
 ---
 
 ### ⚖️ Application Load Balancer (ALB)
 
 * Internet-facing ALB
+* **HTTPS enabled using AWS ACM certificate**
+* Domain mapped via Namecheap DNS
 * Path-based routing:
 
-  * `/` → Frontend service
-  * `/api/*` → Backend service
+```text
+/        → Frontend (React + NGINX)
+/api/*   → Backend (Spring Boot)
+```
+
 * Health checks:
 
   * Frontend → `/`
-  * Backend → `/actuator/health` (or `/api/employees`)
+  * Backend → `/actuator/health`
+
+* HTTP (80) → Redirects to HTTPS (443)
+
+---
+
+### 🔐 HTTPS & Domain Setup
+
+* Domain purchased from **Namecheap**
+* DNS configured to point to ALB
+* SSL certificate provisioned via **AWS ACM**
+* Secure communication enforced across the application
+
+Flow:
+
+```text
+User → Domain (uppoor.online) → ALB (HTTPS) → ECS Services → RDS
+```
 
 ---
 
 ### 🐳 Amazon ECS (Fargate)
 
 * ECS Cluster for container orchestration
+
 * Two services:
 
-  * **Frontend Service**
-  * **Backend Service**
-* Task Definitions define:
+  * **Frontend Service (NGINX, Port 80)**
+  * **Backend Service (Spring Boot, Port 8081)**
 
-  * CPU & Memory
+* Task Definitions include:
+
+  * CPU & Memory configuration
   * Container images from ECR
-  * Port mappings
+  * Environment variables (DB config)
 
 Benefits:
 
 * No server management
-* Scalable container deployment
 * High availability
+* Scalable architecture
 
 ---
 
@@ -87,16 +130,16 @@ Benefits:
 
 * Deployed in private subnets
 * Not publicly accessible
-* Used by backend service for persistence
+* Backend connects securely via security groups
 
 ---
 
 ### 🔐 IAM Roles & Security
 
-* ECS Task Execution Role for pulling images from ECR
+* ECS Task Execution Role for ECR access
 * Security Groups:
 
-  * ALB → public access (HTTP)
+  * ALB → allows HTTP (80) & HTTPS (443)
   * ECS → accepts traffic only from ALB
   * RDS → accepts traffic only from ECS
 
@@ -104,11 +147,22 @@ Benefits:
 
 ## 🔄 CI/CD Integration
 
-Application images are built and pushed via **GitHub Actions**:
+Implemented using **GitHub Actions**:
 
-1. Build Docker images (frontend & backend)
+### Pipeline Flow
+
+```text
+Developer → GitHub → GitHub Actions → Docker Build → ECR → ECS Deployment
+```
+
+### Steps:
+
+1. Build Docker images:
+
+   * Frontend
+   * Backend
 2. Push images to Amazon ECR
-3. ECS services pull latest images during deployment
+3. ECS services pull latest images and deploy
 
 ---
 
@@ -116,25 +170,25 @@ Application images are built and pushed via **GitHub Actions**:
 
 Initialize Terraform:
 
-```
+```bash
 terraform init
 ```
 
 Preview changes:
 
-```
+```bash
 terraform plan
 ```
 
 Apply infrastructure:
 
-```
+```bash
 terraform apply
 ```
 
 Destroy infrastructure (optional):
 
-```
+```bash
 terraform destroy
 ```
 
@@ -142,46 +196,54 @@ terraform destroy
 
 ## 🔐 Security Considerations
 
-* RDS is deployed in **private subnets**
-* ECS services are accessed **only via ALB**
-* Security groups restrict traffic between components
-* No direct public access to backend or database
+* RDS deployed in **private subnets**
+* Backend not directly exposed to internet
+* HTTPS enforced using ACM
+* Traffic controlled via security groups
+* HTTP automatically redirected to HTTPS
 
 ---
 
-## 📈 Key Benefits
+## 📈 Key Highlights
 
-* Containerized deployment using Docker
-* Fully managed compute with ECS Fargate
-* Improved scalability and flexibility
-* Clean separation of frontend and backend services
-* Infrastructure as Code using Terraform
-* CI/CD integration with ECR
+* Fully containerized architecture using Docker
+* Secure HTTPS setup with custom domain
+* Path-based routing using ALB
+* CI/CD pipeline using GitHub Actions
+* Infrastructure managed via Terraform
+* Cost-optimized (no NAT Gateway)
 
 ---
 
 ## 🔮 Future Improvements
 
-* HTTPS with AWS ACM
-* Auto Scaling policies for ECS services
+* Auto Scaling for ECS services
 * AWS Secrets Manager for DB credentials
-* CloudWatch monitoring & logging
+* CloudWatch monitoring & alerts
 * Blue/Green deployments
-* WAF for enhanced security
+* AWS WAF for security
+* Custom domain with Route 53 (optional upgrade)
 
 ---
 
 ## 👨‍💻 Author
 
-Created as part of a **Cloud & DevOps portfolio project** demonstrating:
+Developed as part of a **Cloud & DevOps portfolio project** demonstrating:
 
 * Infrastructure as Code (Terraform)
 * Containerization (Docker)
 * Orchestration (AWS ECS)
-* CI/CD (GitHub Actions)
+* CI/CD pipelines
+* Secure cloud deployments (HTTPS + domain mapping)
 
 ---
 
 ## ⭐ Final Note
 
-This project showcases a **real-world transition from traditional infrastructure to cloud-native architecture**, focusing on scalability, maintainability, and modern DevOps practices.
+This project reflects **production-grade architecture**, including:
+
+```text
+Secure Domain → HTTPS → ALB → ECS → RDS
+```
+
+It showcases the ability to design, deploy, and manage **end-to-end cloud-native applications using modern DevOps practices**.
